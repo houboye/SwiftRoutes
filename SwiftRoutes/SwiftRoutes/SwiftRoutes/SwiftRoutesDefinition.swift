@@ -7,6 +7,6 @@
 
 import UIKit
 
-class SwiftRouteDefinition: NSObject {
+public class SwiftRoutesDefinition: NSObject {
 
 }

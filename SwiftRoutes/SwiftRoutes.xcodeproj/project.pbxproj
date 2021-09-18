@@ -164,6 +164,7 @@
 				A2D0875D26F5C21C00A9BAB4 /* Sources */,
 				A2D0875E26F5C21C00A9BAB4 /* Frameworks */,
 				A2D0875F26F5C21C00A9BAB4 /* Resources */,
+				A21E69A926F5CE7600A8FA70 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -278,6 +279,26 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		A21E69A926F5CE7600A8FA70 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n\nbuild_mode=${CONFIGURATION}\nif test $build_mode == \"Debug\"; then\n    echo \"warning: debug - ${build_mode} -\"\nelse \n    echo \"warning: release - ${build_mode} -\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		A2D0875D26F5C21C00A9BAB4 /* Sources */ = {
