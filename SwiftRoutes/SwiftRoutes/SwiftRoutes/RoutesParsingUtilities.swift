@@ -40,6 +40,81 @@ public class RoutesParsingUtilities {
         
         return updatedQueryParams
     }
+    
+    static func expandOptionalRoutePatternsForPattern(_ pattern: String) -> [String] {
+        
+        /* this method exists to take a route pattern that is known to contain optional params, such as:
+         
+         /path/:thing/(/a)(/b)(/c)
+         
+         and create the following paths:
+         
+         /path/:thing/a/b/c
+         /path/:thing/a/b
+         /path/:thing/a/c
+         /path/:thing/b/c
+         /path/:thing/a
+         /path/:thing/b
+         /path/:thing/c
+         
+         */
+        
+        if pattern.range(of: "(") == nil {
+            return [String]()
+        }
+        
+        // First, parse the route pattern into subpath objects.
+        let subpaths = routeSubpathsForPattern(pattern)
+        if subpaths.count == 0 {
+            return [String]()
+        }
+        
+        // Next, etract out the required subpaths.
+        let tmpSubpaths = subpaths.filter { subpath in
+            return !subpath.isOptionalSubpath
+        }
+        
+        let requiredSubpaths = Set<ParsingUtilities_RouteSubpath>(tmpSubpaths)
+        
+        // Then, expand the subpath permutations into possible route patterns.
+        let allSubpathCombinations = subpaths.routes_allOrderedCombinations()
+        
+        // Finally, we need to filter out any possible route patterns that don't actually satisfy the rules of the route.
+        // What this means in practice is throwing out any that do not contain all required subpaths (since those are explicitly not optional).
+        let validSubpathCombinations = allSubpathCombinations.filter { possibleRouteSubpaths in
+            return requiredSubpaths.isSubset(of: Set<ParsingUtilities_RouteSubpath>(possibleRouteSubpaths))
+        }
+        
+        // Once we have a filtered list of valid subpaths, we just need to convert them back into string routes that can we registered.
+        var validSubpathRouteStrings = validSubpathCombinations.map { subpaths -> String in
+            var routePattern = "/"
+            for subpath in subpaths {
+                let subpathString = subpath.subpathComponents.joined(separator: "/")
+                routePattern = routePattern.appending(subpathString)
+            }
+            return routePattern
+        }
+        
+        // Before returning, sort them by length so that the longest and most specific routes are registered first before the less specific shorter ones.
+        validSubpathRouteStrings.sort { str1, str2 in
+            return str1.count > str2.count
+        }
+        
+        return validSubpathRouteStrings
+    }
+    
+    fileprivate static func routeSubpathsForPattern(_ pattern: String) -> [ParsingUtilities_RouteSubpath] {
+        let subpaths = [ParsingUtilities_RouteSubpath]()
+        let scanner = Scanner(string: pattern)
+        
+        while !scanner.isAtEnd {
+            var preOptionalSubpath: String?
+            let didScan = scanner.scanUpToString("(")
+            
+        }
+        
+        return [ParsingUtilities_RouteSubpath]()
+    }
 }
 
 fileprivate class ParsingUtilities_RouteSubpath: NSObject {
@@ -67,9 +142,9 @@ fileprivate class ParsingUtilities_RouteSubpath: NSObject {
 }
 
 fileprivate extension Array {
-    func routes_allOrderedCombinations() -> [[Any]] {
+    func routes_allOrderedCombinations() -> [[Element]] {
         guard let lastObject = last else {
-            return [[Any]]()
+            return [[Element]]()
         }
         let subArray = Array(self[0..<count])
         let subarrayCombinations = subArray.routes_allOrderedCombinations()
@@ -83,8 +158,8 @@ fileprivate extension Array {
         return combinations
     }
     
-    func routes_filter(_ filterBlock: ((Any)->Bool)) -> [Any] {
-        var filteredArray = [Any]()
+    func routes_filter(_ filterBlock: ((Element)->Bool)) -> [Element] {
+        var filteredArray = [Element]()
         for object in self {
             if filterBlock(object) {
                 filteredArray.append(object)
@@ -93,8 +168,8 @@ fileprivate extension Array {
         return filteredArray
     }
     
-    func routes_map(_ mapBlock: ((Any)->Any)) -> [Any] {
-        var mappedArray = [Any]()
+    func routes_map(_ mapBlock: ((Element)->Element)) -> [Element] {
+        var mappedArray = [Element]()
         for object in self {
             let mappedObject = mapBlock(object)
             mappedArray.append(mappedObject)
