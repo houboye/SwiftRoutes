@@ -103,14 +103,21 @@ public class RoutesParsingUtilities {
         return validSubpathRouteStrings
     }
     
+    // TODO
     fileprivate static func routeSubpathsForPattern(_ pattern: String) -> [ParsingUtilities_RouteSubpath] {
         let subpaths = [ParsingUtilities_RouteSubpath]()
         let scanner = Scanner(string: pattern)
         
         while !scanner.isAtEnd {
             var preOptionalSubpath: String?
-            let didScan = scanner.scanUpToString("(")
+            guard let didScan = scanner.scanUpToString("(") else {
+                fatalError("Unexpected character!")
+            }
             
+            if scanner.isAtEnd == false {
+                // otherwise, advance past the ( character
+                
+            }
         }
         
         return [ParsingUtilities_RouteSubpath]()
